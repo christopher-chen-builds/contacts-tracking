@@ -40,6 +40,7 @@ const AddContactForm = () => {
       contact_method: contactMethod || null,
       comments: comments.trim() || null,
       category,
+      user_id: user?.id,
     });
     setSaving(false);
 
