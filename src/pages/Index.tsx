@@ -1,16 +1,36 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import BottomNav from "@/components/BottomNav";
+import AddContactForm from "@/components/AddContactForm";
+import ContactList from "@/components/ContactList";
+import AnalyticsTab from "@/components/AnalyticsTab";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+type Tab = "add" | "network" | "personal" | "analytics";
+
+const Index = () => {
+  const [activeTab, setActiveTab] = useState<Tab>("add");
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen bg-background">
+      <div className="max-w-lg mx-auto pt-6">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.12 }}
+          >
+            {activeTab === "add" && <AddContactForm />}
+            {activeTab === "network" && <ContactList category="Network" />}
+            {activeTab === "personal" && <ContactList category="Personal" />}
+            {activeTab === "analytics" && <AnalyticsTab />}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
