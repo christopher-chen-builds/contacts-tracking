@@ -2,10 +2,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const CONTACT_METHODS = ["Email", "LinkedIn", "Phone Number"] as const;
 
 const AddContactForm = () => {
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [city, setCity] = useState("");
@@ -38,6 +40,7 @@ const AddContactForm = () => {
       contact_method: contactMethod || null,
       comments: comments.trim() || null,
       category,
+      user_id: user?.id,
     });
     setSaving(false);
 

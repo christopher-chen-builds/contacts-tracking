@@ -4,11 +4,27 @@ import BottomNav from "@/components/BottomNav";
 import AddContactForm from "@/components/AddContactForm";
 import ContactList from "@/components/ContactList";
 import AnalyticsTab from "@/components/AnalyticsTab";
+import ProfileTab from "@/components/ProfileTab";
+import AuthPage from "@/pages/AuthPage";
+import { useAuth } from "@/contexts/AuthContext";
 
-type Tab = "add" | "network" | "personal" | "analytics";
+type Tab = "add" | "network" | "personal" | "analytics" | "profile";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("add");
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthPage />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,6 +41,7 @@ const Index = () => {
             {activeTab === "network" && <ContactList category="Network" />}
             {activeTab === "personal" && <ContactList category="Personal" />}
             {activeTab === "analytics" && <AnalyticsTab />}
+            {activeTab === "profile" && <ProfileTab />}
           </motion.div>
         </AnimatePresence>
       </div>

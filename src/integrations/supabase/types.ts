@@ -25,6 +25,7 @@ export type Database = {
           date_of_last_connection: string | null
           id: string
           name: string
+          user_id: string | null
         }
         Insert: {
           category: string
@@ -36,6 +37,7 @@ export type Database = {
           date_of_last_connection?: string | null
           id?: string
           name: string
+          user_id?: string | null
         }
         Update: {
           category?: string
@@ -47,6 +49,7 @@ export type Database = {
           date_of_last_connection?: string | null
           id?: string
           name?: string
+          user_id?: string | null
         }
         Relationships: []
       }

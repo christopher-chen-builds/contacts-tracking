@@ -1,13 +1,14 @@
-import { Plus, Briefcase, User, BarChart3 } from "lucide-react";
+import { Plus, Briefcase, User, BarChart3, CircleUser } from "lucide-react";
 import { motion } from "framer-motion";
 
-type Tab = "add" | "network" | "personal" | "analytics";
+type Tab = "add" | "network" | "personal" | "analytics" | "profile";
 
 const tabs: { id: Tab; label: string; icon: typeof Plus }[] = [
   { id: "add", label: "Add", icon: Plus },
   { id: "network", label: "Network", icon: Briefcase },
   { id: "personal", label: "Personal", icon: User },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
+  { id: "profile", label: "Profile", icon: CircleUser },
 ];
 
 interface BottomNavProps {
