@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const CONTACT_METHODS = ["Email", "LinkedIn", "Phone Number"] as const;
 
 const AddContactForm = () => {
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [city, setCity] = useState("");
