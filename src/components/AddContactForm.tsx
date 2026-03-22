@@ -63,7 +63,7 @@ const AddContactForm = () => {
       transition={{ duration: 0.2 }}
       className="flex flex-col gap-4 px-4 pb-32"
     >
-      <h1 className="text-display text-2xl text-foreground mb-2">Log Connection</h1>
+      <h1 className="text-display text-2xl text-foreground mb-2">Contacts Directory</h1>
 
       {/* Category Toggle */}
       <div className="flex bg-secondary rounded-xl p-1 gap-1">
