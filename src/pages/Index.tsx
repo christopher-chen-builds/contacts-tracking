@@ -4,11 +4,12 @@ import BottomNav from "@/components/BottomNav";
 import AddContactForm from "@/components/AddContactForm";
 import ContactList from "@/components/ContactList";
 import AnalyticsTab from "@/components/AnalyticsTab";
+import MessagesTab from "@/components/MessagesTab";
 import ProfileTab from "@/components/ProfileTab";
 import AuthPage from "@/pages/AuthPage";
 import { useAuth } from "@/contexts/AuthContext";
 
-type Tab = "add" | "network" | "personal" | "analytics" | "profile";
+type Tab = "add" | "network" | "personal" | "analytics" | "messages" | "profile";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("add");
@@ -41,6 +42,7 @@ const Index = () => {
             {activeTab === "network" && <ContactList category="Network" />}
             {activeTab === "personal" && <ContactList category="Personal" />}
             {activeTab === "analytics" && <AnalyticsTab />}
+            {activeTab === "messages" && <MessagesTab />}
             {activeTab === "profile" && <ProfileTab />}
           </motion.div>
         </AnimatePresence>
