@@ -45,7 +45,7 @@ const AuthPage = () => {
         className="w-full max-w-sm"
       >
         <h1 className="text-display text-3xl text-foreground text-center mb-2">
-          Kinetic CRM
+          Contacts Directory
         </h1>
         <p className="text-muted-foreground text-sm text-center mb-8">
           {isLogin ? "Welcome back." : "Create your account."}

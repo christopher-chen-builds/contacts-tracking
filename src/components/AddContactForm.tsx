@@ -16,6 +16,7 @@ const AddContactForm = () => {
   const [comments, setComments] = useState("");
   const [category, setCategory] = useState<"Network" | "Personal">("Network");
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; category?: string }>({});
 
   const resetForm = () => {
     setName("");
@@ -25,11 +26,20 @@ const AddContactForm = () => {
     setContactMethod("");
     setComments("");
     setCategory("Network");
+    setErrors({});
+  };
+
+  const validate = () => {
+    const errs: { name?: string; category?: string } = {};
+    if (!name.trim()) errs.name = "Name is required";
+    if (!category) errs.category = "Category is required";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!validate()) return;
 
     setSaving(true);
     const { error } = await supabase.from("contacts").insert({
@@ -47,7 +57,7 @@ const AddContactForm = () => {
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Connection stored.", description: `${name} added to ${category}.` });
+      toast({ title: "Contact saved", description: `${name} added to ${category}.` });
       resetForm();
     }
   };
@@ -71,7 +81,7 @@ const AddContactForm = () => {
           <button
             key={cat}
             type="button"
-            onClick={() => setCategory(cat)}
+            onClick={() => { setCategory(cat); setErrors((e) => ({ ...e, category: undefined })); }}
             className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ease-snap duration-150 ${
               category === cat
                 ? "bg-foreground text-background shadow-sm"
@@ -83,14 +93,16 @@ const AddContactForm = () => {
         ))}
       </div>
 
-      <input
-        type="text"
-        placeholder="Name *"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-        className={inputClass}
-      />
+      <div>
+        <input
+          type="text"
+          placeholder="Name *"
+          value={name}
+          onChange={(e) => { setName(e.target.value); setErrors((er) => ({ ...er, name: undefined })); }}
+          className={`${inputClass} ${errors.name ? "border-destructive ring-1 ring-destructive" : ""}`}
+        />
+        {errors.name && <p className="text-destructive text-xs mt-1">{errors.name}</p>}
+      </div>
 
       <input
         type="text"
@@ -123,9 +135,7 @@ const AddContactForm = () => {
       >
         <option value="">Contact Method</option>
         {CONTACT_METHODS.map((m) => (
-          <option key={m} value={m}>
-            {m}
-          </option>
+          <option key={m} value={m}>{m}</option>
         ))}
       </select>
 
@@ -139,7 +149,7 @@ const AddContactForm = () => {
 
       <motion.button
         type="submit"
-        disabled={saving || !name.trim()}
+        disabled={saving}
         whileTap={{ scale: 0.97 }}
         className="w-full h-14 bg-primary text-primary-foreground font-bold rounded-2xl shadow-[0_0_20px_hsl(var(--primary)/0.3)] disabled:opacity-50 transition-all ease-snap duration-100 mt-2"
       >
