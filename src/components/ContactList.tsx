@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, Mail, Linkedin, Phone, Briefcase, User, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import ContactDetail from "./ContactDetail";
 
 interface Contact {
@@ -33,6 +33,14 @@ const methodIcon = (method: string | null) => {
 const CategoryIcon = ({ category }: { category: string }) =>
   category === "Network" ? <Briefcase size={18} /> : <User size={18} />;
 
+const getLastConnectedBadge = (dateStr: string | null) => {
+  if (!dateStr) return { text: "No date", color: "text-muted-foreground bg-secondary" };
+  const days = differenceInDays(new Date(), new Date(dateStr));
+  if (days <= 7) return { text: `${days}d ago`, color: "text-green-400 bg-green-400/10" };
+  if (days <= 30) return { text: `${days}d ago`, color: "text-yellow-400 bg-yellow-400/10" };
+  return { text: "Overdue", color: "text-destructive bg-destructive/10" };
+};
+
 const ContactList = ({ category }: ContactListProps) => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +70,8 @@ const ContactList = ({ category }: ContactListProps) => {
       (c) =>
         c.name.toLowerCase().includes(q) ||
         (c.company && c.company.toLowerCase().includes(q)) ||
-        (c.city && c.city.toLowerCase().includes(q))
+        (c.city && c.city.toLowerCase().includes(q)) ||
+        (c.comments && c.comments.toLowerCase().includes(q))
     );
   }, [contacts, search]);
 
@@ -93,7 +102,7 @@ const ContactList = ({ category }: ContactListProps) => {
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Search by name, company or city…"
+          placeholder="Search name, company, city, comments…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-9 pr-4 py-2.5 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
@@ -102,35 +111,43 @@ const ContactList = ({ category }: ContactListProps) => {
 
       <div className="flex flex-col gap-3">
         <AnimatePresence>
-          {filtered.map((contact, i) => (
-            <motion.button
-              key={contact.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05, duration: 0.15 }}
-              onClick={() => setSelected(contact)}
-              className="flex items-center gap-3 p-4 bg-card rounded-xl border border-border active:bg-surface-hover transition-colors ease-snap duration-150 text-left"
-            >
-              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-primary shrink-0">
-                {contact.contact_method ? methodIcon(contact.contact_method) : <CategoryIcon category={category} />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-foreground font-semibold text-base truncate">{contact.name}</p>
-                <p className="text-muted-foreground text-xs truncate">
-                  {[
-                    contact.company,
-                    contact.city,
-                    contact.date_of_last_connection
-                      ? format(new Date(contact.date_of_last_connection), "MMM d")
-                      : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" • ") || "No details"}
-                </p>
-              </div>
-              <ChevronRight size={18} className="text-muted-foreground shrink-0" />
-            </motion.button>
-          ))}
+          {filtered.map((contact, i) => {
+            const badge = getLastConnectedBadge(contact.date_of_last_connection);
+            return (
+              <motion.button
+                key={contact.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05, duration: 0.15 }}
+                onClick={() => setSelected(contact)}
+                className="flex items-center gap-3 p-4 bg-card rounded-xl border border-border active:bg-surface-hover transition-colors ease-snap duration-150 text-left"
+              >
+                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-primary shrink-0">
+                  {contact.contact_method ? methodIcon(contact.contact_method) : <CategoryIcon category={category} />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-foreground font-semibold text-base truncate">{contact.name}</p>
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${badge.color}`}>
+                      {badge.text}
+                    </span>
+                  </div>
+                  <p className="text-muted-foreground text-xs truncate">
+                    {[
+                      contact.company,
+                      contact.city,
+                      contact.date_of_last_connection
+                        ? format(new Date(contact.date_of_last_connection), "MMM d")
+                        : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" • ") || "No details"}
+                  </p>
+                </div>
+                <ChevronRight size={18} className="text-muted-foreground shrink-0" />
+              </motion.button>
+            );
+          })}
         </AnimatePresence>
 
         {filtered.length === 0 && (
