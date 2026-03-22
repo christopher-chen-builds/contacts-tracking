@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Mail, Linkedin, Phone, Briefcase, User } from "lucide-react";
+import { ChevronRight, Mail, Linkedin, Phone, Briefcase, User, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import ContactDetail from "./ContactDetail";
@@ -37,6 +37,7 @@ const ContactList = ({ category }: ContactListProps) => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Contact | null>(null);
+  const [search, setSearch] = useState("");
 
   const fetchContacts = async () => {
     setLoading(true);
@@ -51,7 +52,19 @@ const ContactList = ({ category }: ContactListProps) => {
 
   useEffect(() => {
     fetchContacts();
+    setSearch("");
   }, [category]);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return contacts;
+    const q = search.toLowerCase();
+    return contacts.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        (c.company && c.company.toLowerCase().includes(q)) ||
+        (c.city && c.city.toLowerCase().includes(q))
+    );
+  }, [contacts, search]);
 
   if (loading) {
     return (
@@ -75,9 +88,21 @@ const ContactList = ({ category }: ContactListProps) => {
         {contacts.length} contact{contacts.length !== 1 ? "s" : ""}
       </p>
 
+      {/* Search Bar */}
+      <div className="relative mb-4">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <input
+          type="text"
+          placeholder="Search by name, company or city…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-9 pr-4 py-2.5 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+        />
+      </div>
+
       <div className="flex flex-col gap-3">
         <AnimatePresence>
-          {contacts.map((contact, i) => (
+          {filtered.map((contact, i) => (
             <motion.button
               key={contact.id}
               initial={{ opacity: 0, y: 8 }}
@@ -86,12 +111,9 @@ const ContactList = ({ category }: ContactListProps) => {
               onClick={() => setSelected(contact)}
               className="flex items-center gap-3 p-4 bg-card rounded-xl border border-border active:bg-surface-hover transition-colors ease-snap duration-150 text-left"
             >
-              {/* Icon */}
               <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-primary shrink-0">
                 {contact.contact_method ? methodIcon(contact.contact_method) : <CategoryIcon category={category} />}
               </div>
-
-              {/* Info */}
               <div className="flex-1 min-w-0">
                 <p className="text-foreground font-semibold text-base truncate">{contact.name}</p>
                 <p className="text-muted-foreground text-xs truncate">
@@ -106,15 +128,14 @@ const ContactList = ({ category }: ContactListProps) => {
                     .join(" • ") || "No details"}
                 </p>
               </div>
-
               <ChevronRight size={18} className="text-muted-foreground shrink-0" />
             </motion.button>
           ))}
         </AnimatePresence>
 
-        {contacts.length === 0 && (
+        {filtered.length === 0 && (
           <div className="text-center py-16 text-muted-foreground text-sm">
-            No {category.toLowerCase()} contacts yet.
+            {search ? "No matches found." : `No ${category.toLowerCase()} contacts yet.`}
           </div>
         )}
       </div>
