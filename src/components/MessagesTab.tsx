@@ -40,6 +40,13 @@ const MessagesTab = ({ preselectedContactId }: MessagesTabProps = {}) => {
     fetchContacts();
   }, []);
 
+  useEffect(() => {
+    if (preselectedContactId && contacts.length > 0) {
+      setSelectedId(preselectedContactId);
+      setStyleNotes("Casual catch-up");
+    }
+  }, [preselectedContactId, contacts]);
+
   const selected = contacts.find((c) => c.id === selectedId) || null;
 
   const filteredContacts = contacts.filter((c) => {
