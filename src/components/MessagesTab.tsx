@@ -13,7 +13,11 @@ interface Contact {
   date_of_last_connection: string | null;
 }
 
-const MessagesTab = () => {
+interface MessagesTabProps {
+  preselectedContactId?: string | null;
+}
+
+const MessagesTab = ({ preselectedContactId }: MessagesTabProps = {}) => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState("");

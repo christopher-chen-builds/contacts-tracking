@@ -13,6 +13,7 @@ type Tab = "add" | "network" | "personal" | "analytics" | "messages" | "profile"
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("add");
+  const [bumpContactId, setBumpContactId] = useState<string | null>(null);
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -39,10 +40,10 @@ const Index = () => {
             transition={{ duration: 0.12 }}
           >
             {activeTab === "add" && <AddContactForm />}
-            {activeTab === "network" && <ContactList category="Network" />}
-            {activeTab === "personal" && <ContactList category="Personal" />}
+            {activeTab === "network" && <ContactList category="Network" onBump={(id) => { setBumpContactId(id); setActiveTab("messages"); }} />}
+            {activeTab === "personal" && <ContactList category="Personal" onBump={(id) => { setBumpContactId(id); setActiveTab("messages"); }} />}
             {activeTab === "analytics" && <AnalyticsTab />}
-            {activeTab === "messages" && <MessagesTab />}
+            {activeTab === "messages" && <MessagesTab preselectedContactId={bumpContactId} />}
             {activeTab === "profile" && <ProfileTab />}
           </motion.div>
         </AnimatePresence>
