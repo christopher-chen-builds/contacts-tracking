@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Mail, Linkedin, Phone, Briefcase, User, Search } from "lucide-react";
+import { ChevronRight, Mail, Linkedin, Phone, Briefcase, User, Search, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, differenceInDays } from "date-fns";
 import ContactDetail from "./ContactDetail";
@@ -19,6 +19,7 @@ interface Contact {
 
 interface ContactListProps {
   category: "Network" | "Personal";
+  onBump?: (contactId: string) => void;
 }
 
 const methodIcon = (method: string | null) => {
@@ -36,12 +37,12 @@ const CategoryIcon = ({ category }: { category: string }) =>
 const getLastConnectedBadge = (dateStr: string | null) => {
   if (!dateStr) return { text: "No date", color: "text-muted-foreground bg-secondary" };
   const days = differenceInDays(new Date(), new Date(dateStr));
-  if (days <= 7) return { text: `${days}d ago`, color: "text-green-400 bg-green-400/10" };
-  if (days <= 30) return { text: `${days}d ago`, color: "text-yellow-400 bg-yellow-400/10" };
+  if (days < 30) return { text: `${days}d ago`, color: "text-muted-foreground bg-secondary" };
+  if (days <= 60) return { text: `${days}d ago`, color: "text-yellow-400 bg-yellow-400/10" };
   return { text: "Overdue", color: "text-destructive bg-destructive/10" };
 };
 
-const ContactList = ({ category }: ContactListProps) => {
+const ContactList = ({ category, onBump }: ContactListProps) => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Contact | null>(null);
@@ -144,6 +145,15 @@ const ContactList = ({ category }: ContactListProps) => {
                       .join(" • ") || "No details"}
                   </p>
                 </div>
+                {onBump && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onBump(contact.id); }}
+                    className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors shrink-0"
+                    title="Bump – send a follow-up"
+                  >
+                    <Zap size={14} />
+                  </button>
+                )}
                 <ChevronRight size={18} className="text-muted-foreground shrink-0" />
               </motion.button>
             );
