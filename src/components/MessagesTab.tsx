@@ -13,7 +13,11 @@ interface Contact {
   date_of_last_connection: string | null;
 }
 
-const MessagesTab = () => {
+interface MessagesTabProps {
+  preselectedContactId?: string | null;
+}
+
+const MessagesTab = ({ preselectedContactId }: MessagesTabProps = {}) => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState("");
@@ -35,6 +39,13 @@ const MessagesTab = () => {
     };
     fetchContacts();
   }, []);
+
+  useEffect(() => {
+    if (preselectedContactId && contacts.length > 0) {
+      setSelectedId(preselectedContactId);
+      setStyleNotes("Casual catch-up");
+    }
+  }, [preselectedContactId, contacts]);
 
   const selected = contacts.find((c) => c.id === selectedId) || null;
 
