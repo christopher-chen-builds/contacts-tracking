@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +17,7 @@ const AddContactForm = () => {
   const [comments, setComments] = useState("");
   const [category, setCategory] = useState<"Network" | "Personal">("Network");
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; category?: string }>({});
 
   const resetForm = () => {
@@ -55,10 +57,16 @@ const AddContactForm = () => {
     setSaving(false);
 
     if (error) {
+      setSaving(false);
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
+      setSaved(true);
       toast({ title: "Contact saved", description: `${name} added to ${category}.` });
-      resetForm();
+      setTimeout(() => {
+        resetForm();
+        setSaving(false);
+        setSaved(false);
+      }, 1000);
     }
   };
 
@@ -151,9 +159,21 @@ const AddContactForm = () => {
         type="submit"
         disabled={saving}
         whileTap={{ scale: 0.97 }}
-        className="w-full h-14 bg-primary text-primary-foreground font-bold rounded-2xl shadow-[0_0_20px_hsl(var(--primary)/0.3)] disabled:opacity-50 transition-all ease-snap duration-100 mt-2"
+        className="w-full h-14 bg-primary text-primary-foreground font-bold rounded-2xl shadow-[0_0_20px_hsl(var(--primary)/0.3)] disabled:opacity-50 transition-all ease-snap duration-100 mt-2 flex items-center justify-center gap-2"
       >
-        {saving ? "Saving..." : "Save Contact"}
+        <AnimatePresence mode="wait">
+          {saved ? (
+            <motion.span key="done" initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-2">
+              <CheckCircle size={20} /> Contact Added
+            </motion.span>
+          ) : saving ? (
+            <motion.span key="saving" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+            </motion.span>
+          ) : (
+            <motion.span key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>Save Contact</motion.span>
+          )}
+        </AnimatePresence>
       </motion.button>
     </motion.form>
   );
