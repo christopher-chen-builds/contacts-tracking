@@ -8,9 +8,26 @@ const AuthPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
 
   const inputClass =
     "w-full px-4 py-3 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors ease-snap";
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Check your email", description: "We sent you a password reset link." });
+      setForgotMode(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,43 +65,37 @@ const AuthPage = () => {
           Contacts Directory
         </h1>
         <p className="text-muted-foreground text-sm text-center mb-8">
-          {isLogin ? "Welcome back." : "Create your account."}
+          {forgotMode ? "Enter your email to reset." : isLogin ? "Welcome back." : "Create your account."}
         </p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className={inputClass}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            className={inputClass}
-          />
+        {forgotMode ? (
+          <form onSubmit={handleForgotPassword} className="flex flex-col gap-4">
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
+            <motion.button type="submit" disabled={loading} whileTap={{ scale: 0.97 }} className="w-full h-14 bg-primary text-primary-foreground font-bold rounded-2xl shadow-[0_0_20px_hsl(var(--primary)/0.3)] disabled:opacity-50 transition-all ease-snap duration-100 mt-2">
+              {loading ? "Please wait..." : "Send Reset Link"}
+            </motion.button>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className={inputClass} />
+            <motion.button type="submit" disabled={loading} whileTap={{ scale: 0.97 }} className="w-full h-14 bg-primary text-primary-foreground font-bold rounded-2xl shadow-[0_0_20px_hsl(var(--primary)/0.3)] disabled:opacity-50 transition-all ease-snap duration-100 mt-2">
+              {loading ? "Please wait..." : isLogin ? "Login" : "Create Account"}
+            </motion.button>
+          </form>
+        )}
 
-          <motion.button
-            type="submit"
-            disabled={loading}
-            whileTap={{ scale: 0.97 }}
-            className="w-full h-14 bg-primary text-primary-foreground font-bold rounded-2xl shadow-[0_0_20px_hsl(var(--primary)/0.3)] disabled:opacity-50 transition-all ease-snap duration-100 mt-2"
-          >
-            {loading ? "Please wait..." : isLogin ? "Login" : "Create Account"}
-          </motion.button>
-        </form>
+        {!forgotMode && isLogin && (
+          <button onClick={() => setForgotMode(true)} className="w-full text-center mt-4 text-xs text-muted-foreground hover:text-primary transition-colors">
+            Forgot password?
+          </button>
+        )}
 
         <button
-          onClick={() => setIsLogin(!isLogin)}
-          className="w-full text-center mt-6 text-sm text-primary hover:underline"
+          onClick={() => { setIsLogin(!isLogin); setForgotMode(false); }}
+          className="w-full text-center mt-4 text-sm text-primary hover:underline"
         >
-          {isLogin ? "Create Account" : "Already have an account? Login"}
+          {forgotMode ? "Back to Login" : isLogin ? "Create Account" : "Already have an account? Login"}
         </button>
       </motion.div>
     </div>
